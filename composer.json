@@ -1,0 +1,33 @@
+{
+    "name": "campaigningbureau/whatsatool-client",
+    "description": "Laravel Package to communicate with the whatsatool API",
+    "keywords": ["laravel", "whatsatool"],
+    "type": "library",
+    "require": {
+        "guzzlehttp/guzzle": "^6.3",
+        "illuminate/support": "~5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.2",
+        "orchestra/testbench": "^3.4",
+        "mockery/mockery": "^0.9.9"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christoph Schleifer",
+            "email": "christoph.schleifer@campaigning-bureau.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "CampaigningBureau\\WhatsAToolClient\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CampaigningBureau\\WhatsAToolClient\\Test\\": "tests/"
+        }
+    }
+}
