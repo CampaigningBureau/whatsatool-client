@@ -2,6 +2,7 @@
 
 namespace CampaigningBureau\WhatsAToolClient;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,6 +31,9 @@ class WhatsAToolClientProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(WhatsAToolClient::class, function () {
+            return new WhatsAToolClient(new Client());
+        });
+        $this->app->alias(WhatsAToolClient::class, 'whatsatool-client');
     }
 }

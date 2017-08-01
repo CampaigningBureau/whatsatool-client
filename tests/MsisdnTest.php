@@ -14,13 +14,13 @@ class MsisdnTest extends TestCase
 {
 
     private $valid_phonenumbers = [
-        ["4366488188122","4366488188122"],
-        ["+4366488188122","4366488188122"],
-        ["004366488188122","4366488188122"],
-        ["066488188122","4366488188122"],
-        ["+43 664 881 881 22","4366488188122"],
-        ["+43 - 664/8818812-2","4366488188122"],
-        ["066488188122","4366488188122"],
+        ["4366488188122", "4366488188122"],
+        ["+4366488188122", "4366488188122"],
+        ["004366488188122", "4366488188122"],
+        ["066488188122", "4366488188122"],
+        ["+43 664 881 881 22", "4366488188122"],
+        ["+43 - 664/8818812-2", "4366488188122"],
+        ["066488188122", "4366488188122"],
     ];
     private $invalid_phonenumbers = [
         "asdf",
@@ -31,7 +31,7 @@ class MsisdnTest extends TestCase
     public function testValidatePhonenumberShouldReturnTrueOnValidPhonenumber()
     {
         foreach ($this->valid_phonenumbers as $phonenumber) {
-            $this->assertTrue(Msisdn::validatePhonenumber($phonenumber[0]),"Valid Phonenumber $phonenumber[0] is wrongfully invalid");
+            $this->assertTrue(Msisdn::validatePhonenumber($phonenumber[0]), "Valid Phonenumber $phonenumber[0] is wrongfully invalid");
         }
     }
 

@@ -21,7 +21,8 @@ class MsisdnValidator
      * @param $validator
      * @return bool
      */
-    public function validate($attribute, $value, $parameters, $validator) {
+    public function validate($attribute, $value, $parameters, $validator)
+    {
         return Msisdn::validatePhonenumber($value);
     }
 

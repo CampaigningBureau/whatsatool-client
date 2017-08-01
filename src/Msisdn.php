@@ -9,7 +9,6 @@
 namespace CampaigningBureau\WhatsAToolClient;
 
 
-use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
 
 class Msisdn
@@ -28,8 +27,7 @@ class Msisdn
         '672', '673', '674', '675', '676', '677', '678', '679', '680', '681', '682', '683', '685', '686', '687', '688',
         '689', '690', '691', '692', '850', '852', '853', '855', '856', '870', '880', '886', '960', '961', '962', '963',
         '964', '965', '966', '967', '968', '971', '972', '973', '974', '975', '976', '977', '992', '993', '994', '995',
-        '996', '998', '1242', '1246', '1264', '1268', '1284', '1340', '1345', '1441', '1473', '1599', '1649', '1664',
-        '1670', '1671', '1684', '1758', '1767', '1784', '1809', '1868', '1869', '1876'];
+        '996', '998'];
 
     /**
      *
@@ -41,8 +39,8 @@ class Msisdn
     {
         if (Msisdn::validatePhonenumber($phonenumber) === false) {
             throw new InvalidArgumentException(
-                'The supplied phonenumber is not valid. '.
-                'You can use the `Msisdn::validatePhonenumber()` method '.
+                'The supplied phonenumber is not valid. ' .
+                'You can use the `Msisdn::validatePhonenumber()` method ' .
                 'to validate the phonenumber passed.'
             );
         }
@@ -54,10 +52,6 @@ class Msisdn
             }
             $this->replaceLocalCountryCode($country_code);
         }
-    }
-
-    public function get() {
-        return $this->msisdn;
     }
 
     /**
@@ -103,9 +97,8 @@ class Msisdn
             return true;
 
         // check if phonenumber starts with valid country code
-        // TODO: for faster search make Country Codes Array as tree
         foreach (Msisdn::VALID_COUNTRY_CODES as $COUNTRY_CODE) {
-            if(strpos($phonenumber, $COUNTRY_CODE) === 0){
+            if (strpos($phonenumber, $COUNTRY_CODE) === 0) {
                 return true;
             }
         }
@@ -130,5 +123,10 @@ class Msisdn
     private function replaceLocalCountryCode(string $country_code)
     {
         $this->msisdn = $country_code . substr($this->msisdn, 1);
+    }
+
+    public function get()
+    {
+        return $this->msisdn;
     }
 }
