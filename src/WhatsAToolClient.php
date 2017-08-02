@@ -91,7 +91,7 @@ class WhatsAToolClient
         $data = json_decode((string)$response->getBody());
 
         if ($data->status === 'error')
-            throw new WhatsAToolException($data->info, $data->statuscode);
+            throw new WhatsAToolException($data->info, $data->code);
 
         return $data;
     }

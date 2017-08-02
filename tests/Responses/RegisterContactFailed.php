@@ -18,7 +18,7 @@ class RegisterContactFailed implements GuzzleResponseMock
     /**
      * @var string
      */
-    private $statusCode;
+    private $code;
     /**
      * @var string
      */
@@ -28,15 +28,15 @@ class RegisterContactFailed implements GuzzleResponseMock
      */
     private $info;
 
-    public function __construct($statusCode, $status, $info)
+    public function __construct($code, $status, $info)
     {
-        $this->statusCode = $statusCode;
+        $this->code = $code;
         $this->status = $status;
         $this->info = $info;
     }
 
     public function getBody(): Stream
     {
-        return stream_for('{"statuscode":"' . $this->statusCode . '","status": "' . $this->status . '","info":"' . $this->info . '"}');
+        return stream_for('{"code":"' . $this->code . '","status": "' . $this->status . '","info":"' . $this->info . '"}');
     }
 }

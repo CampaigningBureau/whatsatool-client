@@ -13,8 +13,8 @@ use CampaigningBureau\WhatsAToolClient\Test\Responses\RegisterContactFailed;
 use CampaigningBureau\WhatsAToolClient\Test\Responses\RegisterContactSuccessful;
 use CampaigningBureau\WhatsAToolClient\WhatsAToolClient;
 use CampaigningBureau\WhatsAToolClient\WhatsAToolException;
-use GuzzleHttp\Client as GuzzleClient;
 use Mockery;
+use WhatsATool;
 
 class ClientTest extends TestCase
 {
@@ -39,7 +39,6 @@ class ClientTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->client = new WhatsAToolClient(new GuzzleClient());
         $this->validPhonenumber = '066488188122';
         $this->validMsisdn = new Msisdn($this->validPhonenumber);
         $this->validSimMsisdn = new Msisdn('436771234567');
@@ -50,10 +49,18 @@ class ClientTest extends TestCase
         Mockery::close();
     }
 
-//    public function testShouldProvideAFacade()
-//    {
-//        WhatsATool::validatePhonenumber($)
-//    }
+    public function testShouldProvideAFacade()
+    {
+        $this->app->bind(WhatsAToolClient::class, function () {
+            $guzzle_mock = Mockery::mock('GuzzleHttp\Client');
+            $guzzle_mock->shouldReceive('get')
+                ->andReturn(new RegisterContactSuccessful());
+            return new WhatsAToolClient($guzzle_mock);
+        });
+        WhatsATool::registerContact($this->validMsisdn);
+
+        $this->assertTrue(true);
+    }
 
     public function testRegisterContactReturnsSimMsisdnOnSuccess()
     {
@@ -64,7 +71,7 @@ class ClientTest extends TestCase
         $this->mockClientWithSuccessfulRegisterContactCall($url, $this->validSimMsisdn);
 
         // act
-        $registeredOnSimMsisdn = $this->client->registerContact($this->validMsisdn, $channel, $sendSms);
+        $registeredOnSimMsisdn = WhatsATool::registerContact($this->validMsisdn, $channel, $sendSms);
 
         // assert
         $this->assertEquals($registeredOnSimMsisdn->get(), $this->validSimMsisdn->get());
@@ -77,7 +84,7 @@ class ClientTest extends TestCase
         $this->mockClientWithSuccessfulRegisterContactCall($url);
 
         // act
-        $this->client->registerContact($this->validMsisdn);
+        WhatsATool::registerContact($this->validMsisdn);
 
         // assert -- only assert the correct url is called in the guzzle mock object
         $this->assertTrue(true);
@@ -91,7 +98,7 @@ class ClientTest extends TestCase
         $this->mockClientWithSuccessfulRegisterContactCall($url);
 
         // act
-        $this->client->registerContact($this->validMsisdn, $channel);
+        WhatsATool::registerContact($this->validMsisdn, $channel);
 
         // assert -- only assert the correct url is called in the guzzle mock object
         $this->assertTrue(true);
@@ -106,7 +113,7 @@ class ClientTest extends TestCase
         $this->mockClientWithSuccessfulRegisterContactCall($url);
 
         // act
-        $this->client->registerContact($this->validMsisdn, $channel, $sendSms);
+        WhatsATool::registerContact($this->validMsisdn, $channel, $sendSms);
 
         // assert -- only assert the correct url is called in the guzzle mock object
         $this->assertTrue(true);
@@ -129,16 +136,29 @@ class ClientTest extends TestCase
         $this->expectExceptionMessage($info);
 
         // act
-        $this->client->registerContact($this->validMsisdn);
+        WhatsATool::registerContact($this->validMsisdn);
     }
 
     private function mockClientWithSuccessfulRegisterContactCall($url, $simMsisdn = null)
     {
-        $guzzle_mock = Mockery::mock('GuzzleHttp\Client');
-        $guzzle_mock->shouldReceive('get')
-            ->with(equalTo($url))
-            ->andReturn(new RegisterContactSuccessful($simMsisdn));
-        $this->client = new WhatsAToolClient($guzzle_mock);
+        $this->app->bind(WhatsAToolClient::class, function () use ($url, $simMsisdn) {
+            $guzzle_mock = Mockery::mock('GuzzleHttp\Client');
+            $guzzle_mock->shouldReceive('get')
+                ->with(equalTo($url))
+                ->andReturn(new RegisterContactSuccessful($simMsisdn));
+            return new WhatsAToolClient($guzzle_mock);
+        });
+    }
+
+    private function mockClientWithFailedRegisterContactCall($url, $statuscode, $info)
+    {
+        $this->app->bind(WhatsAToolClient::class, function () use ($url, $statuscode, $info) {
+            $guzzle_mock = Mockery::mock('GuzzleHttp\Client');
+            $guzzle_mock->shouldReceive('get')
+                ->with(equalTo($url))
+                ->andReturn(new RegisterContactFailed($statuscode, 'error', $info));
+            return new WhatsAToolClient($guzzle_mock);
+        });
     }
 
     /**
@@ -155,15 +175,6 @@ class ClientTest extends TestCase
             $url = $url . "&channel=$channel";
         }
         return $url;
-    }
-
-    private function mockClientWithFailedRegisterContactCall($url, $statuscode, $info)
-    {
-        $guzzle_mock = Mockery::mock('GuzzleHttp\Client');
-        $guzzle_mock->shouldReceive('get')
-            ->with(equalTo($url))
-            ->andReturn(new RegisterContactFailed($statuscode, 'error', $info));
-        $this->client = new WhatsAToolClient($guzzle_mock);
     }
 
 }

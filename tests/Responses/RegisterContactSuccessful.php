@@ -21,7 +21,7 @@ class RegisterContactSuccessful implements GuzzleResponseMock
      */
     private $simMsisdn;
 
-    public function __construct($simMsisdn)
+    public function __construct($simMsisdn = null)
     {
         $this->simMsisdn = ($simMsisdn) ?? new Msisdn("436771234567");
     }
