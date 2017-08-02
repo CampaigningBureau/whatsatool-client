@@ -50,14 +50,14 @@ with local country code is given (e.g. *0664/1234567*)
 To validate a given number:
 ```php
 $phonenumber = '+43 664 123 456 87';
-Msisdn::validate($phonenumber);
+Msisdn::validatePhonenumber($phonenumber);
 ```
 
 To register a new Contact:
 ```php
 $phonenumber = '+43 664 123 456 87';
 $msisdn = new Msisdn($phonenumber);
-WhatsAToolClient::registerContact($msisdn, $channel, $sendSms);
+WhatsATool::registerContact($msisdn, $channel, $sendSms);
 ```
 
 ## Development

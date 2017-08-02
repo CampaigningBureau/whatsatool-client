@@ -13,6 +13,7 @@ use CampaigningBureau\WhatsAToolClient\Test\Responses\RegisterContactFailed;
 use CampaigningBureau\WhatsAToolClient\Test\Responses\RegisterContactSuccessful;
 use CampaigningBureau\WhatsAToolClient\WhatsAToolClient;
 use CampaigningBureau\WhatsAToolClient\WhatsAToolException;
+use GuzzleHttp\Client as GuzzleClient;
 use Mockery;
 
 class ClientTest extends TestCase
@@ -22,11 +23,26 @@ class ClientTest extends TestCase
      * @var WhatsAToolClient
      */
     private $client;
+    /**
+     * @var string
+     */
+    private $validPhonenumber;
+    /**
+     * @var Msisdn
+     */
+    private $validMsisdn;
+    /**
+     * @var Msisdn
+     */
+    private $validSimMsisdn;
 
     public function setUp()
     {
         parent::setUp();
-        $this->client = new WhatsAToolClient(new \GuzzleHttp\Client());
+        $this->client = new WhatsAToolClient(new GuzzleClient());
+        $this->validPhonenumber = '066488188122';
+        $this->validMsisdn = new Msisdn($this->validPhonenumber);
+        $this->validSimMsisdn = new Msisdn('436771234567');
     }
 
     public function tearDown()
@@ -34,24 +50,86 @@ class ClientTest extends TestCase
         Mockery::close();
     }
 
+//    public function testShouldProvideAFacade()
+//    {
+//        WhatsATool::validatePhonenumber($)
+//    }
+
     public function testRegisterContactReturnsSimMsisdnOnSuccess()
     {
-        $simMsisdn = $this->getValidSimMsisdn();
-        $msisdn = $this->getValidMsisdn();
+        // arrange
         $channel = "some_channel";
         $sendSms = false;
-        $this->mockClientWithSuccessfulRegisterContactCall($this->getRegisterContactUrl($msisdn, $channel, $sendSms), $simMsisdn);
-        $this->assertEquals($this->client->registerContact($msisdn, $channel, $sendSms)->get(), $simMsisdn->get());
+        $url = $this->getRegisterContactUrl($this->validMsisdn, $channel, $sendSms);
+        $this->mockClientWithSuccessfulRegisterContactCall($url, $this->validSimMsisdn);
+
+        // act
+        $registeredOnSimMsisdn = $this->client->registerContact($this->validMsisdn, $channel, $sendSms);
+
+        // assert
+        $this->assertEquals($registeredOnSimMsisdn->get(), $this->validSimMsisdn->get());
     }
 
-    private function getValidSimMsisdn()
+    public function testShouldCallCorrectUrlWithOnlyMsisdn()
     {
-        return new Msisdn('436771234567');
+        // arrange
+        $url = $this->getRegisterContactUrl($this->validMsisdn);
+        $this->mockClientWithSuccessfulRegisterContactCall($url);
+
+        // act
+        $this->client->registerContact($this->validMsisdn);
+
+        // assert -- only assert the correct url is called in the guzzle mock object
+        $this->assertTrue(true);
     }
 
-    private function getValidMsisdn()
+    public function testShouldCallCorrectUrlWithOnlyMsisdnAndChannel()
     {
-        return new Msisdn('066488188122');
+        // arrange
+        $channel = "some_channel";
+        $url = $this->getRegisterContactUrl($this->validMsisdn, $channel);
+        $this->mockClientWithSuccessfulRegisterContactCall($url);
+
+        // act
+        $this->client->registerContact($this->validMsisdn, $channel);
+
+        // assert -- only assert the correct url is called in the guzzle mock object
+        $this->assertTrue(true);
+    }
+
+    public function testShouldCallCorrectUrlWithSendSms()
+    {
+        // arrange
+        $channel = "";
+        $sendSms = true;
+        $url = $this->getRegisterContactUrl($this->validMsisdn, $channel, $sendSms);
+        $this->mockClientWithSuccessfulRegisterContactCall($url);
+
+        // act
+        $this->client->registerContact($this->validMsisdn, $channel, $sendSms);
+
+        // assert -- only assert the correct url is called in the guzzle mock object
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldThrowWhatsAToolExceptionOnFailureWithCodeAndMessage()
+    {
+        // arrange
+        $statuscode = 405;
+        $info = 'no permission for edit contact';
+        $url = $this->getRegisterContactUrl($this->validMsisdn);
+        $this->mockClientWithFailedRegisterContactCall($url, $statuscode, $info);
+
+        // assert -- exception need to be setup before
+        $this->expectException(WhatsAToolException::class);
+        $this->expectExceptionCode($statuscode);
+        $this->expectExceptionMessage($info);
+
+        // act
+        $this->client->registerContact($this->validMsisdn);
     }
 
     private function mockClientWithSuccessfulRegisterContactCall($url, $simMsisdn = null)
@@ -77,47 +155,6 @@ class ClientTest extends TestCase
             $url = $url . "&channel=$channel";
         }
         return $url;
-    }
-
-    public function testShouldCallCorrectUrlWithOnlyMsisdn()
-    {
-        $msisdn = $this->getValidMsisdn();
-        $this->mockClientWithSuccessfulRegisterContactCall($this->getRegisterContactUrl($msisdn));
-        $this->client->registerContact($msisdn);
-        $this->assertTrue(true);
-    }
-
-    public function testShouldCallCorrectUrlWithOnlyMsisdnAndChannel()
-    {
-        $msisdn = $this->getValidMsisdn();
-        $channel = "some_channel";
-        $this->mockClientWithSuccessfulRegisterContactCall($this->getRegisterContactUrl($msisdn, $channel));
-        $this->client->registerContact($msisdn, $channel);
-        $this->assertTrue(true);
-    }
-
-    public function testShouldCallCorrectUrlWithSendSms()
-    {
-        $msisdn = $this->getValidMsisdn();
-        $channel = "";
-        $sendSms = true;
-        $this->mockClientWithSuccessfulRegisterContactCall($this->getRegisterContactUrl($msisdn, $channel, $sendSms));
-        $this->client->registerContact($msisdn, $channel, $sendSms);
-        $this->assertTrue(true);
-    }
-
-    public function testShouldThrowWhatsAToolExceptionOnFailureWithCodeAndMessage()
-    {
-        $statuscode = 405;
-        $msisdn = $this->getValidMsisdn();
-        $info = 'no permission for edit contact';
-        $this->mockClientWithFailedRegisterContactCall($this->getRegisterContactUrl($msisdn), $statuscode, $info);
-
-        $this->expectException(WhatsAToolException::class);
-        $this->expectExceptionCode($statuscode);
-        $this->expectExceptionMessage($info);
-
-        $this->client->registerContact($msisdn);
     }
 
     private function mockClientWithFailedRegisterContactCall($url, $statuscode, $info)
