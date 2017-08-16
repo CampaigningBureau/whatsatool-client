@@ -21,11 +21,15 @@ class MsisdnTest extends TestCase
         ["+43 664 881 881 22", "4366488188122"],
         ["+43 - 664/8818812-2", "4366488188122"],
         ["066488188122", "4366488188122"],
+        ["+43 (0) 66488188122", "4366488188122"],
+        ["+43(0)66488188122", "4366488188122"],
+        ["(0)66488188122", "4366488188122"],
     ];
     private $invalid_phonenumbers = [
         "asdf",
         "",
         "2866488188122", //invalid countrycode 28
+        "0",
     ];
 
     public function testValidatePhonenumberShouldReturnTrueOnValidPhonenumber()

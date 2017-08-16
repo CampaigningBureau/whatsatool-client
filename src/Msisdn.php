@@ -72,6 +72,7 @@ class Msisdn
      * Cleans the given phonenumber:
      *   - strips all non-numberic characters
      *   - trims leading 00
+     *   - remove (0) in the number
      *
      * does NOT trim or replace local CC 0, as it is needed for internal storage.
      *
@@ -80,6 +81,9 @@ class Msisdn
      */
     private static function clean(string $phonenumber)
     {
+        // remove (0) in the number, if not at the beginning
+        $phonenumber = preg_replace("/(?<!^)\(0\)/", "", $phonenumber);
+
         // strip all non-numeric characters
         $phonenumber = preg_replace("/[^0-9]/", "", $phonenumber);
 
