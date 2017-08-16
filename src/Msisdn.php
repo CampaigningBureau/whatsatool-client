@@ -73,6 +73,7 @@ class Msisdn
      *   - strips all non-numberic characters
      *   - trims leading 00
      *   - remove (0) in the number
+     *   - change o to 0 (because of typos)
      *
      * does NOT trim or replace local CC 0, as it is needed for internal storage.
      *
@@ -83,6 +84,9 @@ class Msisdn
     {
         // remove (0) in the number, if not at the beginning
         $phonenumber = preg_replace("/(?<!^)\(0\)/", "", $phonenumber);
+
+        // change o to 0 because of typos
+        $phonenumber = preg_replace("/o/", "0", $phonenumber);
 
         // strip all non-numeric characters
         $phonenumber = preg_replace("/[^0-9]/", "", $phonenumber);
